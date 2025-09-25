@@ -1,45 +1,14 @@
-# Simple Dockerfile - copy webapp directly
-FROM tomcat:9.0-jdk11-openjdk
+# Sử dụng official Tomcat image (phiên bản 9.0)
+FROM tomcat:9.0
 
-# Remove default webapps
-RUN rm -rf /usr/local/tomcat/webapps/*
+# Xóa file ROOT default của Tomcat
+RUN rm -rf /usr/local/tomcat/webapps/ROOT
 
-# Create webapp directory structure
-RUN mkdir -p /usr/local/tomcat/webapps/ROOT/WEB-INF/classes
+# Copy file WAR của bạn vào thư mục webapps với tên ROOT.war để nó chạy mặc định trên context root
+COPY ch12_ex1_sqlGateway.war /usr/local/tomcat/webapps/ROOT.war
 
-# Copy web resources
-COPY web/ /usr/local/tomcat/webapps/ROOT/
-
-# Copy and compile Java sources
-COPY src/java/ /tmp/src/
-RUN javac -cp "/usr/local/tomcat/lib/*" \
-    -d /usr/local/tomcat/webapps/ROOT/WEB-INF/classes/ \
-    /tmp/src/murach/data/*.java \
-    /tmp/src/murach/sql/*.java && \
-    rm -rf /tmp/src/
-
-# Set environment variables for database connection
-ENV DB_HOST=localhost \
-    DB_PORT=3306 \
-    DB_NAME=murach \
-    DB_USER=murach_user \
-    DB_PASSWORD=sesame
-
-# Expose port 8080
+# Expose port 8080 để truy cập Tomcat
 EXPOSE 8080
 
-# Start Tomcat
-CMD ["catalina.sh", "run"]
-
-# Set environment variables for database connection
-ENV DB_HOST=localhost
-ENV DB_PORT=3306
-ENV DB_NAME=murach
-ENV DB_USER=murach_user
-ENV DB_PASSWORD=sesame
-
-# Expose port 8080
-EXPOSE 8080
-
-# Start Tomcat
+# Khởi động Tomcat
 CMD ["catalina.sh", "run"]
